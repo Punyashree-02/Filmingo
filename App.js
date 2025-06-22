@@ -8,6 +8,8 @@ import SignupScreen from './screens/SignupScreen';
 import HomeScreen from './screens/HomeScreen';
 import MovieDetailsScreen from './screens/MovieDetailsScreen';
 import BookScreen from './screens/BookScreen';
+import SeatSelectionScreen from './screens/SeatSelectionScreen';
+import PaymentScreen from './screens/PaymentScreen';
 import { AuthProvider } from './context/AuthContext'; 
 
 const Stack = createNativeStackNavigator();
@@ -23,6 +25,8 @@ export default function App() {
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Details" component={MovieDetailsScreen} />
           <Stack.Screen name="Book" component={BookScreen} />
+          <Stack.Screen name="SeatSelectionScreen" component={SeatSelectionScreen} />
+           <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </AuthProvider>

@@ -32,7 +32,7 @@ const halls = {
   Puri: ['Anapurna Theatre', 'RajMandir', 'Shri Krishna Cinema Hall'],
 };
 
-const BookScreen = () => {
+const BookScreen = ({navigation}) => {
   const [selectedCity, setSelectedCity] = useState(null);
   const [dates, setDates] = useState([]);
 
@@ -85,10 +85,24 @@ const BookScreen = () => {
         <>
           <Text style={styles.header}>🏟️ Halls in {selectedCity}</Text>
           {halls[selectedCity]?.map((hall, index) => (
-            <View key={index} style={styles.hallBox}>
-              <Text style={styles.hallText}>{hall}</Text>
-            </View>
-          ))}
+  <TouchableOpacity
+    key={index}
+    style={styles.hallBox}
+    onPress={() => {
+      const today = new Date();
+      const currentDate = today.toISOString().slice(0, 10); 
+      navigation.navigate('SeatSelectionScreen', {
+        theaterId: hall,
+        city: selectedCity,
+        movieId: 'someMovieId', 
+        date: currentDate,
+        showTime: '18:00', 
+      });
+    }}>
+    <Text style={styles.hallText}>{hall}</Text>
+  </TouchableOpacity>
+))}
+
         </>
       )}
     </ScrollView>
