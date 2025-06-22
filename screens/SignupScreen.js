@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   View,
   Text,
@@ -15,8 +15,10 @@ import {
   Image,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthContext } from '../context/AuthContext';
 
 export default function SignupScreen({ navigation }) {
+  const { login } = useContext(AuthContext);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,9 +38,24 @@ export default function SignupScreen({ navigation }) {
 
     try {
       await AsyncStorage.setItem('localUser', JSON.stringify(user));
-      Alert.alert('Success', 'Account created! Please log in.');
-      navigation.navigate('Login');
+
+      const accessToken = 'dummy_token'; // or from your signup API response
+      if (accessToken != null) {
+        await AsyncStorage.setItem('access_token', accessToken);
+      } else {
+        await AsyncStorage.removeItem('access_token');
+      }
+
+      login(accessToken); // Auto login
+
+      Alert.alert('Success', 'Account created!', [
+        {
+          text: 'OK',
+          onPress: () => navigation.navigate('Main'), // Navigate to Drawer
+        },
+      ]);
     } catch (err) {
+      console.error('Signup storage error:', err);
       Alert.alert('Error', 'Something went wrong. Try again.');
     }
   };

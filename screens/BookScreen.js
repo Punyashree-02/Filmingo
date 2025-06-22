@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -26,44 +26,23 @@ const halls = {
   Bangalore: ['PVR Orion', 'INOX Garuda Mall', 'Cinepolis Mantri'],
   Chennai: ['Sathyam Cinemas', 'INOX Citi Centre', 'SPI Palazzo'],
   Kolkata: ['INOX South City', 'Navina Cinema', 'Carnival Diamond'],
-  Cuttack:['INOX','Sangam Talkies','Brundaban Talkies'],
-  Bhubaneswar: ['Maharaja', 'PVR Inox,Utkal Galleria', 'Inox Esplande', 'Inox,DN Regalia', 'Keshari Talkies'],
+  Cuttack: ['INOX', 'Sangam Talkies', 'Brundaban Talkies'],
+  Bhubaneswar: [
+    'Maharaja',
+    'PVR Inox,Utkal Galleria',
+    'Inox Esplande',
+    'Inox,DN Regalia',
+    'Keshari Talkies',
+  ],
   Berhampur: ['Rukmani Talkies', 'Gautam Cinema', 'Payal Talies'],
   Puri: ['Anapurna Theatre', 'RajMandir', 'Shri Krishna Cinema Hall'],
 };
 
-const BookScreen = ({navigation}) => {
+const BookScreen = ({ navigation }) => {
   const [selectedCity, setSelectedCity] = useState(null);
-  const [dates, setDates] = useState([]);
-
-  useEffect(() => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth();
-    const numDays = new Date(year, month + 1, 0).getDate();
-    const generatedDates = [];
-
-    for (let i = 1; i <= numDays; i++) {
-      const date = new Date(year, month, i);
-      generatedDates.push({
-        label: date.toDateString().slice(0, 10),
-        day: i,
-      });
-    }
-    setDates(generatedDates);
-  }, []);
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.header}>🎫 Select Date</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
-        {dates.map((item) => (
-          <View key={item.label} style={styles.dateBox}>
-            <Text style={styles.dateText}>{item.label}</Text>
-          </View>
-        ))}
-      </ScrollView>
-
       <Text style={styles.header}>🏙️ Select City</Text>
       <View style={styles.cityContainer}>
         {cities.map((city) => (
@@ -85,24 +64,24 @@ const BookScreen = ({navigation}) => {
         <>
           <Text style={styles.header}>🏟️ Halls in {selectedCity}</Text>
           {halls[selectedCity]?.map((hall, index) => (
-  <TouchableOpacity
-    key={index}
-    style={styles.hallBox}
-    onPress={() => {
-      const today = new Date();
-      const currentDate = today.toISOString().slice(0, 10); 
-      navigation.navigate('SeatSelectionScreen', {
-        theaterId: hall,
-        city: selectedCity,
-        movieId: 'someMovieId', 
-        date: currentDate,
-        showTime: '18:00', 
-      });
-    }}>
-    <Text style={styles.hallText}>{hall}</Text>
-  </TouchableOpacity>
-))}
-
+            <TouchableOpacity
+              key={index}
+              style={styles.hallBox}
+              onPress={() => {
+                const today = new Date();
+                const currentDate = today.toISOString().slice(0, 10);
+                navigation.navigate('SeatSelectionScreen', {
+                  theaterId: hall,
+                  city: selectedCity,
+                  movieId: 'someMovieId', // Replace with actual movie ID
+                  date: currentDate,
+                  showTime: '18:00',
+                });
+              }}
+            >
+              <Text style={styles.hallText}>{hall}</Text>
+            </TouchableOpacity>
+          ))}
         </>
       )}
     </ScrollView>
@@ -121,18 +100,6 @@ const styles = StyleSheet.create({
     color: '#FFA500',
     marginVertical: 12,
     marginTop: 30,
-  },
-  dateBox: {
-    backgroundColor: '#1a1a1a',
-    padding: 12,
-    borderRadius: 10,
-    marginRight: 10,
-    borderColor: '#FFA500',
-    borderWidth: 1,
-  },
-  dateText: {
-    color: '#FFA500',
-    fontSize: 14,
   },
   cityContainer: {
     flexDirection: 'row',

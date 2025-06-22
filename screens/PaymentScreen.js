@@ -1,18 +1,33 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 
 const snackItems = [
-  { id: '1', name: 'Popcorn (Small)', price: 80 },
-  { id: '2', name: 'Popcorn (Large)', price: 150 },
-  { id: '3', name: 'Nachos', price: 120 },
-  { id: '4', name: 'Coke', price: 60 },
-  { id: '5', name: 'Pepsi', price: 60 },
-  { id: '6', name: 'Water Bottle', price: 30 },
-  { id: '7', name: 'Burger', price: 100 },
+  { id: '1', name: '🍿 Popcorn (Small)', price: 80 },
+  { id: '2', name: '🍿 Popcorn (Large)', price: 150 },
+  { id: '3', name: '🧀 Nachos', price: 120 },
+  { id: '4', name: '🥤 Coke', price: 60 },
+  { id: '5', name: '🥤 Pepsi', price: 60 },
+  { id: '6', name: '💧 Water Bottle', price: 30 },
+  { id: '7', name: '🍔 Burger', price: 100 },
 ];
 
-const PaymentScreen = ({ route }) => {
-  const { selectedSeats, totalAmount, movieId, theaterId, date, showTime, city } = route.params;
+const PaymentScreen = ({ route, navigation }) => {
+  const {
+    selectedSeats,
+    totalAmount,
+    movieId,
+    theaterId,
+    date,
+    showTime,
+    city,
+  } = route.params;
 
   const [selectedSnacks, setSelectedSnacks] = useState([]);
 
@@ -29,27 +44,31 @@ const PaymentScreen = ({ route }) => {
     }
   };
 
-  const getSnackTotal = () => {
-    return selectedSnacks.reduce((sum, item) => sum + item.price, 0);
-  };
+  const getSnackTotal = () =>
+    selectedSnacks.reduce((sum, item) => sum + item.price, 0);
 
   const grandTotal = totalAmount + getSnackTotal();
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Payment Screen</Text>
-      <Text style={styles.text}>Seats: {selectedSeats.join(', ')}</Text>
-      <Text style={styles.text}>Base Ticket Total: ₹{totalAmount}</Text>
-      <Text style={styles.text}>Movie Name: {movieId}</Text>
-      <Text style={styles.text}>Theater: {theaterId}</Text>
-      <Text style={styles.text}>City: {city}</Text>
-      <Text style={styles.text}>Date: {date}</Text>
-      <Text style={styles.text}>Show Time: {showTime}</Text>
+    <ScrollView style={styles.container}>
+      <Text style={styles.heading}>💳 Payment Summary</Text>
 
-      <Text style={[styles.heading, { marginTop: 24 }]}>Add Snacks & Beverages</Text>
+      <View style={styles.infoBox}>
+        <Text style={styles.info}>🎟️ Seats: <Text style={styles.value}>{selectedSeats.join(', ')}</Text></Text>
+        <Text style={styles.info}>🎫 Ticket Total: <Text style={styles.value}>₹{totalAmount}</Text></Text>
+        <Text style={styles.info}>🎬 Movie: <Text style={styles.value}>{movieId}</Text></Text>
+        <Text style={styles.info}>🏢 Theater: <Text style={styles.value}>{theaterId}</Text></Text>
+        <Text style={styles.info}>📍 City: <Text style={styles.value}>{city}</Text></Text>
+        <Text style={styles.info}>📅 Date: <Text style={styles.value}>{date}</Text></Text>
+        <Text style={styles.info}>⏰ Time: <Text style={styles.value}>{showTime}</Text></Text>
+      </View>
+
+      <Text style={styles.snackHeading}>🍿 Snacks & Beverages</Text>
+
       <FlatList
         data={snackItems}
         keyExtractor={(item) => item.id}
+        scrollEnabled={false}
         renderItem={({ item }) => {
           const quantity = selectedSnacks.filter((s) => s.id === item.id).length;
           return (
@@ -58,11 +77,17 @@ const PaymentScreen = ({ route }) => {
                 {item.name} - ₹{item.price}
               </Text>
               <View style={styles.actions}>
-                <TouchableOpacity onPress={() => handleRemoveSnack(item.id)} style={styles.actionButton}>
+                <TouchableOpacity
+                  onPress={() => handleRemoveSnack(item.id)}
+                  style={styles.actionButton}
+                >
                   <Text style={styles.actionText}>-</Text>
                 </TouchableOpacity>
                 <Text style={styles.quantity}>{quantity}</Text>
-                <TouchableOpacity onPress={() => handleAddSnack(item)} style={styles.actionButton}>
+                <TouchableOpacity
+                  onPress={() => handleAddSnack(item)}
+                  style={styles.actionButton}
+                >
                   <Text style={styles.actionText}>+</Text>
                 </TouchableOpacity>
               </View>
@@ -71,11 +96,29 @@ const PaymentScreen = ({ route }) => {
         }}
       />
 
-      <View style={styles.totalContainer}>
-        <Text style={styles.totalText}>Snacks Total: ₹{getSnackTotal()}</Text>
-        <Text style={styles.totalText}>Grand Total: ₹{grandTotal}</Text>
+      <View style={styles.totalBox}>
+        <Text style={styles.total}>🥤 Snacks Total: ₹{getSnackTotal()}</Text>
+        <Text style={styles.total}>💰 Grand Total: ₹{grandTotal}</Text>
       </View>
-    </View>
+
+      <TouchableOpacity
+        style={styles.payButton}
+        onPress={() =>
+          navigation.navigate('TicketDetailsScreen', {
+            selectedSeats,
+            snacks: selectedSnacks,
+            totalAmount: grandTotal,
+            movieId,
+            theaterId,
+            date,
+            showTime,
+            city,
+          })
+        }
+      >
+        <Text style={styles.payText}>✅ Pay Now</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 };
 
@@ -83,29 +126,50 @@ export default PaymentScreen;
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: '#0d0d0d',
     flex: 1,
-    padding: 24,
-    backgroundColor: '#fff',
+    padding: 20,
   },
   heading: {
-    fontSize: 22,
+    fontSize: 24,
+    color: '#FFA500',
     fontWeight: 'bold',
-    marginBottom: 12,
+    marginBottom: 20,
   },
-  text: {
+  infoBox: {
+    backgroundColor: '#1a1a1a',
+    padding: 14,
+    borderRadius: 12,
+    marginBottom: 20,
+    borderColor: '#FFA500',
+    borderWidth: 1,
+  },
+  info: {
     fontSize: 16,
-    marginBottom: 8,
+    color: '#ccc',
+    marginBottom: 6,
+  },
+  value: {
+    color: '#FFA500',
+    fontWeight: '600',
+  },
+  snackHeading: {
+    fontSize: 20,
+    color: '#FFA500',
+    fontWeight: 'bold',
+    marginVertical: 14,
   },
   snackItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: 8,
-    paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    marginVertical: 10,
+    backgroundColor: '#222',
+    padding: 10,
+    borderRadius: 10,
   },
   snackName: {
+    color: '#fff',
     fontSize: 16,
     flex: 1,
   },
@@ -114,32 +178,50 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   actionButton: {
-    width: 30,
-    height: 30,
-    backgroundColor: '#007bff',
-    borderRadius: 4,
+    width: 32,
+    height: 32,
+    backgroundColor: '#FFA500',
+    borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
   },
   actionText: {
-    color: '#fff',
+    color: '#0d0d0d',
     fontSize: 18,
+    fontWeight: 'bold',
   },
   quantity: {
     fontSize: 16,
+    color: '#FFA500',
     marginHorizontal: 10,
-    width: 20,
-    textAlign: 'center',
   },
-  totalContainer: {
+  totalBox: {
     marginTop: 24,
+    borderTopColor: '#333',
     borderTopWidth: 1,
-    borderColor: '#ccc',
     paddingTop: 12,
   },
-  totalText: {
+  total: {
+    color: '#FFA500',
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: 6,
+  },
+  payButton: {
+    marginTop: 30,
+    backgroundColor: '#FFA500',
+    paddingVertical: 16,
+    borderRadius: 30,
+    alignItems: 'center',
+    shadowColor: '#FFA500',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  payText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#0d0d0d',
   },
 });

@@ -24,12 +24,12 @@ export const AuthProvider = ({ children }) => {
             setAccessToken(newToken);
             setIsAuthenticated(true);
           } else {
-            logout();
+            await logout();
           }
         }
       } catch (e) {
         console.error('Initialization error:', e);
-        logout();
+        await logout();
       } finally {
         setLoading(false);
       }
@@ -39,17 +39,38 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (access, refresh) => {
-    await AsyncStorage.setItem('access_token', access);
-    await AsyncStorage.setItem('refresh_token', refresh);
-    setAccessToken(access);
-    setIsAuthenticated(true);
+    try {
+      // Save or remove access_token safely
+      if (access != null) {
+        await AsyncStorage.setItem('access_token', access);
+        setAccessToken(access);
+      } else {
+        await AsyncStorage.removeItem('access_token');
+        setAccessToken(null);
+      }
+
+      // Save or remove refresh_token safely
+      if (refresh != null) {
+        await AsyncStorage.setItem('refresh_token', refresh);
+      } else {
+        await AsyncStorage.removeItem('refresh_token');
+      }
+
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.error('Login storage error:', error);
+    }
   };
 
   const logout = async () => {
-    await AsyncStorage.removeItem('access_token');
-    await AsyncStorage.removeItem('refresh_token');
-    setIsAuthenticated(false);
-    setAccessToken(null);
+    try {
+      await AsyncStorage.removeItem('access_token');
+      await AsyncStorage.removeItem('refresh_token');
+      setAccessToken(null);
+      setIsAuthenticated(false);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const refreshAccessToken = async (refreshToken) => {

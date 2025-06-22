@@ -35,7 +35,10 @@ const LoginScreen = ({ navigation }) => {
           parsedUser.password === password
         ) {
           if (rememberMe) {
-            await AsyncStorage.setItem('access_token', 'dummy_token');
+            const accessToken = 'dummy_token'; // or get from your API response
+            if (accessToken != null) {
+              await AsyncStorage.setItem('access_token', accessToken);
+            }
           } else {
             await AsyncStorage.removeItem('access_token');
           }
@@ -45,7 +48,7 @@ const LoginScreen = ({ navigation }) => {
           Alert.alert('Success', 'Logged in!', [
             {
               text: 'OK',
-              onPress: () => navigation.navigate('Home'), // or any screen
+              onPress: () => navigation.navigate('Main'), // ✅ navigate to Drawer
             },
           ]);
         } else {
@@ -55,7 +58,7 @@ const LoginScreen = ({ navigation }) => {
         Alert.alert('No User Found', 'Please sign up first.');
       }
     } catch (error) {
-      console.error(error);
+      console.error('Login storage error:', error);
       Alert.alert('Error', 'Something went wrong.');
     }
   };

@@ -9,6 +9,8 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
+import { DrawerActions } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 
 import { movies } from '../utils/db';
 
@@ -49,9 +51,25 @@ const HomeScreen = ({ navigation }) => {
     </TouchableOpacity>
   );
 
+  const handleLogout = () => {
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Login' }],
+    });
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>🎬 Now Showing</Text>
+      <View style={styles.topBar}>
+        <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
+          <Ionicons name="menu" size={28} color="#FFA500" />
+        </TouchableOpacity>
+        <Text style={styles.header}>🎬 Now Showing</Text>
+        <TouchableOpacity onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={24} color="#FFA500" />
+        </TouchableOpacity>
+      </View>
+
       {loading ? (
         <ActivityIndicator size="large" color="#FFA500" />
       ) : (
@@ -75,12 +93,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 40,
   },
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   header: {
-    fontSize: 26,
+    fontSize: 24,
     color: '#FFA500',
     fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
   },
   card: {
     backgroundColor: '#1a1a1a',

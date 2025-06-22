@@ -6,11 +6,23 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  Image,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const rows = ['A', 'B', 'C', 'D', 'E'];
+const rows = {
+  Recliner: ['A', 'B'],
+  'Dress Circle': ['C', 'D'],
+  Executive: ['E'],
+};
+
 const cols = [1, 2, 3, 4, 5, 6, 7, 8];
+
+const prices = {
+  Recliner: 300,
+  'Dress Circle': 200,
+  Executive: 150,
+};
 
 const generateDates = () => {
   const dates = [];
@@ -24,7 +36,6 @@ const generateDates = () => {
   return dates;
 };
 
-// 👉 Utility functions for persistent storage
 const getBookedSeats = async (key) => {
   try {
     const json = await AsyncStorage.getItem(key);
@@ -63,11 +74,8 @@ const SeatSelectionScreen = ({ route, navigation }) => {
 
   const handleSelectSeat = (seatId) => {
     if (bookedSeats.includes(seatId)) return;
-
     setSelectedSeats((prev) =>
-      prev.includes(seatId)
-        ? prev.filter((s) => s !== seatId)
-        : [...prev, seatId]
+      prev.includes(seatId) ? prev.filter((s) => s !== seatId) : [...prev, seatId]
     );
   };
 
@@ -83,9 +91,20 @@ const SeatSelectionScreen = ({ route, navigation }) => {
     await saveBookedSeats(key, updated);
     setBookedSeats(updated);
 
+    const totalAmount = selectedSeats.reduce((sum, seat) => {
+      const row = seat.charAt(0);
+      const price =
+        rows.Recliner.includes(row)
+          ? prices.Recliner
+          : rows['Dress Circle'].includes(row)
+          ? prices['Dress Circle']
+          : prices.Executive;
+      return sum + price;
+    }, 0);
+
     navigation.navigate('PaymentScreen', {
       selectedSeats,
-      totalAmount: selectedSeats.length * 150,
+      totalAmount,
       movieId,
       theaterId,
       date: selectedDate,
@@ -117,10 +136,25 @@ const SeatSelectionScreen = ({ route, navigation }) => {
     );
   };
 
+  const renderCategory = (categoryName, rowsArray) => (
+    <View style={styles.sectionContainer} key={categoryName}>
+      <Text style={styles.categoryHeading}>{`${categoryName} ₹${prices[categoryName]}`}</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <View style={styles.seatMap}>
+          {rowsArray.map((row) => (
+            <View key={row} style={styles.row}>
+              {cols.map((col) => renderSeat(row, col))}
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+    </View>
+  );
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.heading}>Select Date</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
+      <Text style={styles.heading}>📅 Select Date</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dateList}>
         {availableDates.map((d) => (
           <TouchableOpacity
             key={d.value}
@@ -130,39 +164,37 @@ const SeatSelectionScreen = ({ route, navigation }) => {
             ]}
             onPress={() => setSelectedDate(d.value)}
           >
-            <Text style={styles.dateText}>{d.label}</Text>
+            <Text
+              style={[
+                styles.dateText,
+                selectedDate === d.value && { color: '#0d0d0d' },
+              ]}
+            >
+              {d.label}
+            </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
+        <Text style={{ fontSize: 16, color: '#FFA500', marginVertical: 10, textAlign: 'center', fontWeight: '600' }}>
+  {`City: ${city}, Theater: ${theaterId}, Date: ${selectedDate}, Time: ${showTime}`}
+</Text>
+      <Text style={styles.heading}>🎟️ Select Seats</Text>
 
-      <Text style={styles.heading}>Select Seats</Text>
-      <Text style={styles.subheading}>
-        {`City: ${city}, Theater: ${theaterId}, Date: ${selectedDate}, Time: ${showTime}`}
-      </Text>
-
-      <View style={styles.screenLabel}>
-        <Text style={styles.screenText}>SCREEN</Text>
-      </View>
-
-      <View style={styles.seatMap}>
-        {rows.map((row) => (
-          <View key={row} style={styles.row}>
-            {cols.map((col) => renderSeat(row, col))}
-          </View>
-        ))}
-      </View>
+            {Object.entries(rows).map(([category, rowArray]) =>
+        renderCategory(category, rowArray)
+      )}
 
       <View style={styles.legendContainer}>
         <View style={[styles.legend, styles.bookedSeat]} />
-        <Text>Booked</Text>
+        <Text style={styles.legendText}>Booked</Text>
         <View style={[styles.legend, styles.availableSeat]} />
-        <Text>Available</Text>
+        <Text style={styles.legendText}>Available</Text>
         <View style={[styles.legend, styles.selectedSeat]} />
-        <Text>Selected</Text>
+        <Text style={styles.legendText}>Selected</Text>
       </View>
 
       <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
-        <Text style={styles.confirmText}>Confirm Booking</Text>
+        <Text style={styles.confirmText}>✅ Confirm Booking</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -170,103 +202,127 @@ const SeatSelectionScreen = ({ route, navigation }) => {
 
 export default SeatSelectionScreen;
 
-// Styles
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    alignItems: 'center',
+    backgroundColor: '#0d0d0d',
+    padding: 16,
+    paddingBottom: 40,
+    flexGrow: 1,
   },
   heading: {
-    fontSize: 20,
+    fontSize: 22,
+    color: '#FFA500',
     fontWeight: 'bold',
-    marginBottom: 6,
+    marginBottom: 10,
+    textAlign: 'center',
   },
   subheading: {
     fontSize: 14,
-    marginBottom: 12,
-    color: 'gray',
+    color: '#bbb',
+    marginBottom: 16,
     textAlign: 'center',
   },
-  screenLabel: {
-    backgroundColor: '#ccc',
-    padding: 8,
-    width: '100%',
-    alignItems: 'center',
-    borderRadius: 5,
-    marginBottom: 12,
+  dateList: {
+    marginBottom: 20,
+    paddingHorizontal: 8,
   },
-  screenText: {
-    fontSize: 16,
-    fontWeight: '600',
+  dateButton: {
+    backgroundColor: '#222',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginRight: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#FFA500',
+  },
+  selectedDateButton: {
+    backgroundColor: '#FFA500',
+  },
+  dateText: {
+    color: '#FFA500',
+    fontWeight: 'bold',
+  },
+  screenImage: {
+    height: 40,
+    width: '100%',
+    marginBottom: 16,
+  },
+  sectionContainer: {
+    marginBottom: 24,
+  },
+  categoryHeading: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FF8C00',
+    marginBottom: 10,
   },
   seatMap: {
-    marginVertical: 10,
+    paddingHorizontal: 8,
   },
   row: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    marginVertical: 5,
+    marginVertical: 6,
   },
   seat: {
-    width: 40,
-    height: 40,
-    backgroundColor: '#e0e0e0',
+    width: 38,
+    height: 38,
+    backgroundColor: '#333',
     borderWidth: 1,
-    borderColor: '#999',
-    margin: 4,
+    borderColor: '#FFA500',
+    margin: 5,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 6,
+    borderRadius: 8,
   },
   seatText: {
+    color: '#FFA500',
+    fontWeight: '600',
     fontSize: 12,
-    fontWeight: '500',
   },
   bookedSeat: {
-    backgroundColor: '#d9534f',
+    backgroundColor: '#a94442',
+    borderColor: '#a94442',
   },
   selectedSeat: {
     backgroundColor: '#5cb85c',
+    borderColor: '#5cb85c',
   },
   availableSeat: {
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#333',
   },
   legendContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    marginVertical: 16,
+    justifyContent: 'space-evenly',
     alignItems: 'center',
+    marginVertical: 16,
   },
   legend: {
-    width: 20,
-    height: 20,
-    marginHorizontal: 8,
+    width: 18,
+    height: 18,
     borderRadius: 4,
+    marginRight: 6,
+  },
+  legendText: {
+    color: '#ccc',
+    marginRight: 12,
+    fontSize: 12,
   },
   confirmButton: {
-    backgroundColor: '#007bff',
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 20,
+    backgroundColor: '#FFA500',
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 30,
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#FFA500',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    alignSelf: 'center',
   },
   confirmText: {
-    color: '#fff',
+    color: '#0d0d0d',
     fontSize: 16,
-  },
-  dateButton: {
-    backgroundColor: '#eee',
-    padding: 10,
-    marginRight: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#aaa',
-  },
-  selectedDateButton: {
-    backgroundColor: '#007bff',
-    borderColor: '#007bff',
-  },
-  dateText: {
-    color: '#333',
+    fontWeight: 'bold',
   },
 });
