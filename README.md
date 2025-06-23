@@ -34,9 +34,15 @@
 - **Storage** – AsyncStorage  
 - **Navigation** – React Navigation  
 - **UI Icons** – React Native Vector Icons  
----
 ## 🚀 **Installation & Running the App**
 ### 📁 **1. Clone the Repository**
 ```bash
 git clone https://github.com/yourusername/filmingo.git
 cd filmingo
+
+PRESENTED BY:-
+TEAM SPARK:-
+1.AYUSH MOHANTY
+2.SHAMIT RATH
+3.SHRIDHAR DASH
+4.PUNYASHREE DAS
