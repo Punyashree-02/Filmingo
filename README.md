@@ -39,6 +39,10 @@
 ```bash
 git clone https://github.com/yourusername/filmingo.git
 cd filmingo
+2. Install Dependecies
+npm install
+3.Run the App
+npx expo start
 
 PRESENTED BY:-
 TEAM SPARK:-
