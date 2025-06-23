@@ -69,7 +69,7 @@ const TicketDetailsScreen = ({ route, navigation }) => {
   const handleDone = () => {
     navigation.reset({
       index: 0,
-      routes: [{ name: 'Main' }], // Navigate to main/drawer screen
+      routes: [{ name: 'Main' }],
     });
   };
 

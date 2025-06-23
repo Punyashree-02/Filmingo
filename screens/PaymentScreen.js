@@ -50,17 +50,31 @@ const PaymentScreen = ({ route, navigation }) => {
   const grandTotal = totalAmount + getSnackTotal();
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.scroll}>
       <Text style={styles.heading}>💳 Payment Summary</Text>
 
       <View style={styles.infoBox}>
-        <Text style={styles.info}>🎟️ Seats: <Text style={styles.value}>{selectedSeats.join(', ')}</Text></Text>
-        <Text style={styles.info}>🎫 Ticket Total: <Text style={styles.value}>₹{totalAmount}</Text></Text>
-        <Text style={styles.info}>🎬 Movie: <Text style={styles.value}>{movieId}</Text></Text>
-        <Text style={styles.info}>🏢 Theater: <Text style={styles.value}>{theaterId}</Text></Text>
-        <Text style={styles.info}>📍 City: <Text style={styles.value}>{city}</Text></Text>
-        <Text style={styles.info}>📅 Date: <Text style={styles.value}>{date}</Text></Text>
-        <Text style={styles.info}>⏰ Time: <Text style={styles.value}>{showTime}</Text></Text>
+        <Text style={styles.info}>
+          🎟️ Seats: <Text style={styles.value}>{selectedSeats.join(', ')}</Text>
+        </Text>
+        <Text style={styles.info}>
+          🎫 Ticket Total: <Text style={styles.value}>₹{totalAmount}</Text>
+        </Text>
+        <Text style={styles.info}>
+          🎬 Movie: <Text style={styles.value}>{movieId}</Text>
+        </Text>
+        <Text style={styles.info}>
+          🏢 Theater: <Text style={styles.value}>{theaterId}</Text>
+        </Text>
+        <Text style={styles.info}>
+          📍 City: <Text style={styles.value}>{city}</Text>
+        </Text>
+        <Text style={styles.info}>
+          📅 Date: <Text style={styles.value}>{date}</Text>
+        </Text>
+        <Text style={styles.info}>
+          ⏰ Time: <Text style={styles.value}>{showTime}</Text>
+        </Text>
       </View>
 
       <Text style={styles.snackHeading}>🍿 Snacks & Beverages</Text>
@@ -101,6 +115,7 @@ const PaymentScreen = ({ route, navigation }) => {
         <Text style={styles.total}>💰 Grand Total: ₹{grandTotal}</Text>
       </View>
 
+      {/* ✅ Pay Button inside ScrollView */}
       <TouchableOpacity
         style={styles.payButton}
         onPress={() =>
@@ -126,9 +141,12 @@ export default PaymentScreen;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#0d0d0d',
     flex: 1,
+    backgroundColor: '#0d0d0d',
+  },
+  scroll: {
     padding: 20,
+    paddingBottom: 40, // to avoid overlap
   },
   heading: {
     fontSize: 24,
@@ -208,16 +226,12 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   payButton: {
-    marginTop: 30,
+    marginTop: 20,
     backgroundColor: '#FFA500',
     paddingVertical: 16,
     borderRadius: 30,
     alignItems: 'center',
-    shadowColor: '#FFA500',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
-    elevation: 5,
+    marginBottom: 40,
   },
   payText: {
     fontSize: 18,

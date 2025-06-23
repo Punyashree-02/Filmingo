@@ -14,6 +14,7 @@ import PaymentScreen from './screens/PaymentScreen';
 import TicketDetailsScreen from './screens/TicketDetailsScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import BookingHistoryScreen from './screens/BookingHistoryScreen';
+import MoodSelectorScreen from './screens/MoodSelectorScreen';
 
 import { AuthProvider } from './context/AuthContext';
 
@@ -36,6 +37,7 @@ export default function App() {
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Signup" component={SignupScreen} />
+        <Stack.Screen name="MoodSelectorScreen" component={MoodSelectorScreen}/>
           <Stack.Screen name="Main" component={DrawerRoutes} />
           <Stack.Screen name="Details" component={MovieDetailsScreen} />
           <Stack.Screen name="Book" component={BookScreen} />

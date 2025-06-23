@@ -7,23 +7,35 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  TextInput,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 
 const ProfileScreen = ({ navigation }) => {
   const [user, setUser] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedName, setEditedName] = useState('');
+  const [editedEmail, setEditedEmail] = useState('');
+  const [profileImageUri, setProfileImageUri] = useState(null);
 
   useEffect(() => {
     const loadUser = async () => {
       try {
         const userData = await AsyncStorage.getItem('localUser');
-        if (userData) setUser(JSON.parse(userData));
+        if (userData) {
+          const parsed = JSON.parse(userData);
+          setUser(parsed);
+          setEditedName(parsed.name);
+          setEditedEmail(parsed.email);
+        }
+        const savedUri = await AsyncStorage.getItem('profile_image');
+        if (savedUri) setProfileImageUri(savedUri);
       } catch (e) {
         console.error('Failed to load user:', e);
       }
     };
-
     loadUser();
   }, []);
 
@@ -35,34 +47,84 @@ const ProfileScreen = ({ navigation }) => {
         style: 'destructive',
         onPress: async () => {
           try {
-            await AsyncStorage.removeItem('access_token');
-            await AsyncStorage.removeItem('refresh_token');
-            await AsyncStorage.removeItem('localUser');
+            await AsyncStorage.multiRemove(['access_token', 'refresh_token']);
+            // Do NOT remove localUser so user can login again
           } catch (e) {
-            console.error('Error clearing storage on logout:', e);
+            console.error('Error clearing tokens on logout:', e);
           }
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Login' }],
-          });
+          navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
         },
       },
     ]);
   };
 
+  const handleEditToggle = () => {
+    setIsEditing(true);
+  };
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+    if (!result.canceled && result.assets?.[0]?.uri) {
+      setProfileImageUri(result.assets[0].uri);
+    }
+  };
+
+  const saveChanges = async () => {
+    const updatedUser = { name: editedName, email: editedEmail, password: user.password };
+    setUser(updatedUser);
+    await AsyncStorage.setItem('localUser', JSON.stringify(updatedUser));
+    if (profileImageUri) {
+      await AsyncStorage.setItem('profile_image', profileImageUri);
+    }
+    setIsEditing(false);
+    Alert.alert('Profile Updated');
+  };
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Image
-        source={require('../assets/profile.png')}
-        style={styles.profileImage}
-      />
-      <Text style={styles.name}>{user?.name || 'John Doe'}</Text>
-      <Text style={styles.email}>{user?.email || 'john.doe@example.com'}</Text>
-
-      <TouchableOpacity style={styles.editBtn} onPress={() => Alert.alert('Edit Profile', 'Feature coming soon!')}>
-        <Ionicons name="create-outline" size={20} color="#0d0d0d" />
-        <Text style={styles.editText}>Edit Profile</Text>
+      <TouchableOpacity onPress={isEditing ? pickImage : null}>
+        <Image
+          source={profileImageUri ? { uri: profileImageUri } : require('../assets/profile.png')}
+          style={styles.profileImage}
+        />
       </TouchableOpacity>
+      {isEditing ? (
+        <>
+          <TextInput
+            style={styles.input}
+            value={editedName}
+            onChangeText={setEditedName}
+            placeholder="Name"
+            placeholderTextColor="#aaa"
+          />
+          <TextInput
+            style={styles.input}
+            value={editedEmail}
+            onChangeText={setEditedEmail}
+            placeholder="Email"
+            placeholderTextColor="#aaa"
+            keyboardType="email-address"
+          />
+          <TouchableOpacity style={styles.editBtn} onPress={saveChanges}>
+            <Ionicons name="save-outline" size={20} color="#0d0d0d" />
+            <Text style={styles.editText}>Save Changes</Text>
+          </TouchableOpacity>
+        </>
+      ) : (
+        <>
+          <Text style={styles.name}>{user?.name || 'John Doe'}</Text>
+          <Text style={styles.email}>{user?.email || 'john.doe@example.com'}</Text>
+          <TouchableOpacity style={styles.editBtn} onPress={handleEditToggle}>
+            <Ionicons name="create-outline" size={20} color="#0d0d0d" />
+            <Text style={styles.editText}>Edit Profile</Text>
+          </TouchableOpacity>
+        </>
+      )}
 
       <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
         <Ionicons name="log-out-outline" size={20} color="#0d0d0d" />
@@ -100,6 +162,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#ccc',
     marginBottom: 30,
+  },
+  input: {
+    width: '100%',
+    backgroundColor: '#1e1e1e',
+    color: '#fff',
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 16,
+    fontSize: 16,
   },
   editBtn: {
     flexDirection: 'row',

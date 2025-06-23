@@ -5,19 +5,22 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
+  TouchableOpacity,
+  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 
-// Your movie list with id-title mapping
 const movies = [
   { id: '1', title: 'Avengers: Endgame' },
   { id: '2', title: 'Oppenheimer' },
-  // add more movies here
+  // Add more movies as needed
 ];
 
 const BookingHistoryScreen = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState('');
 
   useEffect(() => {
     const loadBookings = async () => {
@@ -28,8 +31,10 @@ const BookingHistoryScreen = () => {
           setLoading(false);
           return;
         }
+
         const user = JSON.parse(userData);
         const bookingsKey = `bookings_${user.email}`;
+        setUserEmail(user.email);
         const savedBookings = await AsyncStorage.getItem(bookingsKey);
         setBookings(savedBookings ? JSON.parse(savedBookings) : []);
       } catch (e) {
@@ -42,6 +47,47 @@ const BookingHistoryScreen = () => {
 
     loadBookings();
   }, []);
+
+  const getMovieTitle = (id) => {
+    const movie = movies.find((m) => m.id === id);
+    return movie ? movie.title : id;
+  };
+
+  const handleDelete = (index) => {
+    Alert.alert('Delete Booking', 'Are you sure you want to delete this booking?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          const updated = [...bookings];
+          updated.splice(index, 1);
+          setBookings(updated);
+          try {
+            await AsyncStorage.setItem(`bookings_${userEmail}`, JSON.stringify(updated));
+          } catch (e) {
+            console.error('Error deleting booking:', e);
+          }
+        },
+      },
+    ]);
+  };
+
+  const renderBooking = ({ item, index }) => (
+    <View style={styles.card}>
+      <Text style={styles.movieTitle}>🎬 {getMovieTitle(item.movie)}</Text>
+      <Text style={styles.infoLine}>📍 {item.city}</Text>
+      <Text style={styles.infoLine}>🏢 {item.theater}</Text>
+      <Text style={styles.infoLine}>📅 {item.date}</Text>
+      <Text style={styles.infoLine}>⏰ {item.time}</Text>
+      <Text style={styles.infoLine}>💺 Seats: {item.seats.join(', ')}</Text>
+
+      <TouchableOpacity style={styles.deleteBtn} onPress={() => handleDelete(index)}>
+        <Ionicons name="trash-outline" size={18} color="#0d0d0d" />
+        <Text style={styles.deleteText}>Delete</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   if (loading) {
     return (
@@ -58,23 +104,6 @@ const BookingHistoryScreen = () => {
       </View>
     );
   }
-
-  // Helper to get movie title by id
-  const getMovieTitle = (id) => {
-    const movie = movies.find((m) => m.id === id);
-    return movie ? movie.title : id;
-  };
-
-  const renderBooking = ({ item }) => (
-    <View style={styles.card}>
-      <Text style={styles.movieTitle}>🎬 {getMovieTitle(item.movie)}</Text>
-      <Text style={styles.infoLine}>📍 {item.city}</Text>
-      <Text style={styles.infoLine}>🏢 {item.theater}</Text>
-      <Text style={styles.infoLine}>📅 {item.date}</Text>
-      <Text style={styles.infoLine}>⏰ {item.time}</Text>
-      <Text style={styles.infoLine}>💺 Seats: {item.seats.join(', ')}</Text>
-    </View>
-  );
 
   return (
     <View style={styles.container}>
@@ -133,5 +162,22 @@ const styles = StyleSheet.create({
   noBookingText: {
     color: '#fff',
     fontSize: 18,
+  },
+ deleteBtn: {
+  position: 'absolute',
+  top: 10,
+  right: 10,
+  backgroundColor: '#FFA500',
+  paddingVertical: 8,
+  paddingHorizontal: 14,
+  borderRadius: 20,
+  flexDirection: 'row',
+  alignItems: 'center',
+  zIndex: 1
+},
+  deleteText: {
+    marginLeft: 6,
+    color: '#0d0d0d',
+    fontWeight: 'bold',
   },
 });

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -15,10 +15,8 @@ import {
   Image,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AuthContext } from '../context/AuthContext';
 
 export default function SignupScreen({ navigation }) {
-  const { login } = useContext(AuthContext);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -39,19 +37,14 @@ export default function SignupScreen({ navigation }) {
     try {
       await AsyncStorage.setItem('localUser', JSON.stringify(user));
 
-      const accessToken = 'dummy_token'; // or from your signup API response
-      if (accessToken != null) {
-        await AsyncStorage.setItem('access_token', accessToken);
-      } else {
-        await AsyncStorage.removeItem('access_token');
-      }
+      // You may store a token or skip this step entirely
+      const accessToken = 'dummy_token';
+      await AsyncStorage.setItem('access_token', accessToken);
 
-      login(accessToken); // Auto login
-
-      Alert.alert('Success', 'Account created!', [
+      Alert.alert('Success', 'Account created successfully!', [
         {
           text: 'OK',
-          onPress: () => navigation.navigate('Main'), // Navigate to Drawer
+          onPress: () => navigation.navigate('Login'), // Navigate to Login instead of Home
         },
       ]);
     } catch (err) {
@@ -126,7 +119,8 @@ export default function SignupScreen({ navigation }) {
 
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
               <Text style={styles.link}>
-                Already have an account? <Text style={styles.linkBold}>Log in</Text>
+                Already have an account?{' '}
+                <Text style={styles.linkBold}>Log in</Text>
               </Text>
             </TouchableOpacity>
           </View>

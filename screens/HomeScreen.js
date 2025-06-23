@@ -60,6 +60,7 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      {/* Top Bar */}
       <View style={styles.topBar}>
         <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
           <Ionicons name="menu" size={28} color="#FFA500" />
@@ -70,17 +71,29 @@ const HomeScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
+      {/* Loader or Movie List */}
       {loading ? (
         <ActivityIndicator size="large" color="#FFA500" />
       ) : (
-        <FlatList
-          data={movieList}
-          renderItem={renderMovieCard}
-          keyExtractor={(item, index) => item.id?.toString() || index.toString()}
-          numColumns={2}
-          columnWrapperStyle={{ justifyContent: 'space-between' }}
-          contentContainerStyle={{ paddingBottom: 20 }}
-        />
+        <View style={{ flex: 1 }}>
+          {/* Mood Button */}
+          <TouchableOpacity
+            style={styles.moodButton}
+            onPress={() => navigation.navigate('MoodSelectorScreen')}
+          >
+            <Text style={styles.moodButtonText}>🎭 Mood Based Recommender</Text>
+          </TouchableOpacity>
+
+          {/* Movie Grid */}
+          <FlatList
+            data={movieList}
+            renderItem={renderMovieCard}
+            keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+            numColumns={2}
+            columnWrapperStyle={{ justifyContent: 'space-between' }}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          />
+        </View>
       )}
     </View>
   );
@@ -102,6 +115,18 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 24,
     color: '#FFA500',
+    fontWeight: 'bold',
+  },
+  moodButton: {
+    backgroundColor: '#444',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  moodButtonText: {
+    color: '#fff',
+    fontSize: 16,
     fontWeight: 'bold',
   },
   card: {
